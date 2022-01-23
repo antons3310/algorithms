@@ -248,8 +248,7 @@ public class StringListImpl implements StringList {
                         throw new NullObjectException();
                 }
 
-                return array.equals(otherList);
-
+                return Arrays.equals(array, otherList.toArray());
         }
 
         // Вернуть фактическое количество элементов.
@@ -283,10 +282,7 @@ public class StringListImpl implements StringList {
         // и вернуть его.
         @Override
         public String[] toArray() {
-                //return new String[INIT_SIZE];
-                List<String> stringList = Arrays.asList("gog", "cat", "homework", "list", "github");
-
-                return stringList.toArray(new String[0]);
+                return Arrays.copyOf(array,array.length);
         }
 
 
