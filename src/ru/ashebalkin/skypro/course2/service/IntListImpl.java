@@ -1,8 +1,6 @@
 package ru.ashebalkin.skypro.course2.service;
 
-import ru.ashebalkin.skypro.course2.exceptions.ArrayOutOfRangeExceptions;
-import ru.ashebalkin.skypro.course2.exceptions.ItemNotFoundException;
-import ru.ashebalkin.skypro.course2.exceptions.NullObjectException;
+import ru.ashebalkin.skypro.course2.exceptions.*;
 
 import java.util.Arrays;
 
@@ -14,6 +12,7 @@ public class IntListImpl implements IntList {
         private int[] array;
         private static int position = 0;
         int INIT_SIZE = 20;
+        int CUT_RATE = 4;
 
         public IntListImpl() {
                 array = new int[INIT_SIZE];
@@ -46,32 +45,29 @@ public class IntListImpl implements IntList {
         // в качестве результата выполнения.
         @Override
         public int addByIndex(int index, int item) {
-                if (index == array.length - 1) {
-                        return add(item);
-                }
-
-                if (index == 0 && position == array.length - 1) {
-                        resizeArray(array.length * 2);
-                }
-
-                if (index >= 0 && index <= position + 1) {
-                        int[] arrayLeft = new int[index + 1];
-                        int[] arrayRight = new int[array.length - index - 1];
-
-                        System.arraycopy(array, 0, arrayLeft, 0, index);
-                        System.arraycopy(array, index, arrayRight, 0, array.length - index - 1);
-
-                        arrayLeft[index] = item;
-
-                        array = copyOf(arrayLeft, arrayLeft.length + arrayRight.length);
-
-                        System.arraycopy(arrayRight, 0, array, arrayLeft.length, arrayRight.length);
-
-                        return array[index];
-
-                } else {
+                if (index > position ) {
                         throw new ArrayOutOfRangeExceptions();
                 }
+
+                resizeArray(array.length * 2);
+
+                int[] arrayLeft = new int[index + 1];
+                int[] arrayRight = new int[array.length - index - 1];
+
+                System.arraycopy(array, 0, arrayLeft, 0, index);
+                System.arraycopy(array, index, arrayRight, 0, array.length - index - 1);
+
+                arrayLeft[index] = item;
+
+                position++;
+
+                array = copyOf(arrayLeft, arrayLeft.length + arrayRight.length);
+
+                System.arraycopy(arrayRight, 0, array, arrayLeft.length, arrayRight.length);
+
+                return array[index];
+
+
         }
 
         // Установить элемент
@@ -84,11 +80,10 @@ public class IntListImpl implements IntList {
         @Override
         public int set(int index, int item) {
 
-                if (index >= 0 && index <= position + 1) {
+                if (index < position ) {
                         array[index] = item;
 
                         return array[index];
-
                 } else {
                         throw new ArrayOutOfRangeExceptions();
                 }
@@ -126,7 +121,7 @@ public class IntListImpl implements IntList {
         @Override
         public void removeByIndex(int index) {
 
-                if (index <= position + 1) {
+                if (index < position) {
                         modifyArrayByIndex(index);
 
                 } else {
@@ -145,13 +140,19 @@ public class IntListImpl implements IntList {
                 array = copyOf(arrayLeft, arrayLeft.length + arrayRight.length);
 
                 System.arraycopy(arrayRight, 0, array, arrayLeft.length, arrayRight.length);
+
+                position--;
+
+                if (array.length > INIT_SIZE && position < array.length / CUT_RATE) {
+                    resizeArray(array.length / 2);
+                }
         }
 
         // Проверка на существование элемента.
         // Вернуть true/false;
         @Override
         public boolean contains(int item) {
-                int[] arrayForSearch = Arrays.copyOf(array, array.length);
+                int[] arrayForSearch = Arrays.copyOf(array, position);
 
                 sort(arrayForSearch);
 
@@ -164,15 +165,18 @@ public class IntListImpl implements IntList {
         // или -1 в случае отсутствия.
         @Override
         public int indexOf(int item) {
-                int index = -1;
 
+            int index = -1;
+
+            if (contains(item)) {
                 for (int i = 0; i < position; i++) {
-                        if (array[i] == item) {
-                                index = i;
-                                break;
-                        }
+                    if (array[i] == item) {
+                        index = i;
+                        break;
+                    }
                 }
-                return index;
+            }
+            return index;
         }
 
         // Поиск элемента с конца.
@@ -180,15 +184,18 @@ public class IntListImpl implements IntList {
         // или -1 в случае отсутствия.
         @Override
         public int lastIndexOf(int item) {
-                int index = -1;
+            int index = -1;
 
+            if (contains(item)){
                 for (int i = position - 1; i > 0; i--) {
-                        if (array[i] == item) {
-                                index = i;
-                                break;
-                        }
+                    if (array[i] == item) {
+                        index = i;
+                        break;
+                    }
                 }
-                return index;
+            }
+
+            return index;
         }
 
         // Получить элемент по индексу.
@@ -213,7 +220,9 @@ public class IntListImpl implements IntList {
                         throw new NullObjectException();
                 }
 
-                return Arrays.equals(array, otherList.toArray());
+                int [] arrCopyArray = Arrays.copyOf(array,position);
+
+                return Arrays.equals(arrCopyArray, otherList.toArray());
         }
 
         // Вернуть фактическое количество элементов.
@@ -241,7 +250,7 @@ public class IntListImpl implements IntList {
         // и вернуть его.
         @Override
         public int[] toArray() {
-                return copyOf(array, array.length);
+                return copyOf(array, position);
         }
 
         private static void sort(int[] arr) {
