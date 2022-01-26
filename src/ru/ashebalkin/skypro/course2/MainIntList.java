@@ -9,7 +9,7 @@ public class MainIntList {
 
     public static void main(String[] args) {
 
-        checkAlgorithmsTime();
+//        checkAlgorithmsTime();
 
         IntList numbers = new IntListImpl();
 
@@ -18,18 +18,12 @@ public class MainIntList {
         numbers.add(510);
         numbers.add(6483);
         numbers.add(8543);
-        numbers.add(3513);
-        numbers.add(3515);
-        numbers.add(8400);
-        numbers.add(2843);
-        numbers.add(2334);
-        numbers.add(3112);
-        numbers.add(3846);
-        numbers.add(6843);
-        numbers.add(8513);
 
-        System.out.println("numbers.contains(511) = " + numbers.contains(511));
-        System.out.println("numbers.contains(510) = " + numbers.contains(510));
+        numbers.removeByIndex(3);
+
+
+
+
 
     }
 
@@ -53,6 +47,18 @@ public class MainIntList {
         start = System.currentTimeMillis();
         sortInsertion(num3);
         System.out.println(System.currentTimeMillis() - start + " sortInsertion");
+
+        IntList numbers4 = new IntListImpl();
+        int[] num4 = generateRandomArray(numbers4.toArray());
+        start = System.currentTimeMillis();
+        quickSort(num4, 0, num4.length - 1);
+        System.out.println(System.currentTimeMillis() - start + " quickSort");
+
+        IntList numbers5 = new IntListImpl();
+        int[] num5 = generateRandomArray(numbers5.toArray());
+        start = System.currentTimeMillis();
+        mergeSort(num5);
+        System.out.println(System.currentTimeMillis() - start + " mergeSort");
     }
 
     private static int[] generateRandomArray(int[] arr) {
@@ -100,6 +106,73 @@ public class MainIntList {
                 j--;
             }
             arr[j] = temp;
+        }
+    }
+
+    private static void quickSort(int[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, end);
+        }
+    }
+
+    private static int partition(int[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
+    private static void mergeSort(int[] arr) {
+        if (arr.length < 2) {
+            return;
+        }
+        int mid = arr.length / 2;
+        int[] left = new int[mid];
+        int[] right = new int[arr.length - mid];
+
+        for (int i = 0; i < left.length; i++) {
+            left[i] = arr[i];
+        }
+
+        for (int i = 0; i < right.length; i++) {
+            right[i] = arr[mid + i];
+        }
+
+        mergeSort(left);
+        mergeSort(right);
+
+        merge(arr, left, right);
+    }
+
+    private static void merge(int[] arr, int[] left, int[] right) {
+
+        int mainP = 0;
+        int leftP = 0;
+        int rightP = 0;
+        while (leftP < left.length && rightP < right.length) {
+            if (left[leftP] <= right[rightP]) {
+                arr[mainP++] = left[leftP++];
+            } else {
+                arr[mainP++] = right[rightP++];
+            }
+        }
+        while (leftP < left.length) {
+            arr[mainP++] = left[leftP++];
+        }
+        while (rightP < right.length) {
+            arr[mainP++] = right[rightP++];
         }
     }
 }
