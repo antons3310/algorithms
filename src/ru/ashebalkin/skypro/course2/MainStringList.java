@@ -3,7 +3,7 @@ package ru.ashebalkin.skypro.course2;
 import ru.ashebalkin.skypro.course2.service.StringList;
 import ru.ashebalkin.skypro.course2.service.StringListImpl;
 
-public class Main {
+public class MainStringList {
 
     public static void main(String[] args) {
 
